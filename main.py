@@ -94,6 +94,6 @@ if __name__ == "__main__":
         intermediate_steps.append((agent_step, str(observation)))
 
 
-    print("BRUH >:(")
+    print("no kurwa mać, mail z polibudy mi psuje contribuitons")
 
 
