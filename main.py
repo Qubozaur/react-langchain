@@ -42,7 +42,7 @@ def get_text_length(text: str) -> int:
 
 
 if __name__ == "__main__":
-    print("Hello react langchain")
+    print("Hello react langchain :P ")
     tools = [get_text_length]
 
     template = """
