@@ -84,5 +84,4 @@ if __name__ == "__main__":
     print("Hello LangChain Tools!")
     run_question("What is the length of the word 'DOG'?")
     run_question("What is 7 times 13?")
-    run_question("What is 'hello' in reverse?")
-    print(all_)
+    run_question("What is 'hello world :P' in reverse?")

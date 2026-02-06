@@ -7,8 +7,11 @@ requires-python = ">=3.12"
 dependencies = [
     "black>=26.1.0",
     "callbacks>=0.3.0",
+    "isort>=7.0.0",
     "langchain>=1.2.8",
     "langchain-community>=0.4.1",
     "langchain-openai>=1.1.7",
+    "langchain-pinecone>=0.2.13",
+    "langchainhub>=0.1.21",
     "python-dotenv>=1.2.1",
 ]
