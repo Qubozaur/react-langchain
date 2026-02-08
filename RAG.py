@@ -1,13 +1,15 @@
 import os
+from operator import itemgetter
 from pydoc import doc
 from dotenv import load_dotenv
 from langchain_community.document_loaders import TextLoader
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
-from pinecone.db_data.dataclasses import search_rerank
 
 load_dotenv()
 
@@ -60,6 +62,18 @@ if __name__ == "__main__":
         response = llm.invoke(messages)
         return response.content
 
+
+    def create_retrevial_chain_with_lcel():
+        retrieval_chain = (
+            RunnablePassthrough.assign(
+                context=itemgetter("question") | retriever | format_docs
+            )
+            | prompt_template 
+            | llm 
+            | StrOutputParser()
+        )
+        return retrieval_chain
+
     query = "What is Pinecone in machine learning ?"
 
     # no RAG
@@ -71,6 +85,12 @@ if __name__ == "__main__":
     # no lcel
     result_without_lcel = retrieval_chain_without_lcel(query=query)
     print(result_without_lcel)
+
+    print("="*70)
+    # lcel 
+    chain_with_lcel = create_retrevial_chain_with_lcel()
+    result_with_lcel = chain_with_lcel.invoke({"question": query})
+    print(result_with_lcel)
 
 
 
