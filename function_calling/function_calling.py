@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from dotenv import load_dotenv
 from langchain.tools import BaseTool, tool
@@ -23,10 +23,34 @@ def multiply(x: int, y: int) -> int:
     """Return the result of multiplying two integers."""
     return x * y
 
+
+@tool
+def add_numbers(x: int, y: int) -> int:
+    """Return the sum of two integers."""
+    return x + y
+
+
+@tool
+def to_uppercase(text: str) -> str:
+    """Return the given text in uppercase."""
+    return text.upper()
+
+
 @tool
 def reverse_string(string: str) -> str:
-    """Returns reversed string"""
+    """Returns reversed string."""
     return string[::-1]
+
+
+def get_default_tools() -> List[BaseTool]:
+    """Return the default set of tools used by the demo."""
+    return [
+        get_text_length,
+        multiply,
+        add_numbers,
+        to_uppercase,
+        reverse_string,
+    ]
 
 def find_tool_by_name(tools: List[BaseTool], tool_name: str) -> BaseTool:
     """Helper to look up a tool by name."""
@@ -36,11 +60,20 @@ def find_tool_by_name(tools: List[BaseTool], tool_name: str) -> BaseTool:
     raise ValueError(f"Tool with name {tool_name} not found")
 
 
-def run_question(question: str) -> None:
-    """Ask the LLM a question and let it decide which tools to call."""
+def run_question(question: str, tools: Optional[List[BaseTool]] = None) -> str:
+    """Run a single question and return the LLM's final answer as text.
+    Ask the LLM a question and let it decide which tools to call.
+
+    Args:
+        question: Natural language question for the LLM.
+        tools: Optional custom list of tools. If not provided, a default
+            set of tools (get_text_length, multiply, add_numbers,
+            to_uppercase, reverse_string) will be used.
+    """
     print(f"\nQuestion: {question}")
 
-    tools: List[BaseTool] = [get_text_length, multiply, reverse_string]
+    if tools is None:
+        tools = get_default_tools()
 
     llm = ChatOpenAI(temperature=0)
     llm_with_tools = llm.bind_tools(tools)
@@ -49,7 +82,8 @@ def run_question(question: str) -> None:
         SystemMessage(
             content=(
                 "You are a helpful assistant. "
-                "You can use tools to get the length of text, multiply two numbers or to reverse string. "
+                "You can use tools to get the length of text, add or multiply two numbers, "
+                "convert text to uppercase, or reverse a string. "
                 "Use tools when they help answer the question."
             )
         ),
@@ -76,8 +110,35 @@ def run_question(question: str) -> None:
                 )
             continue
 
-        print(f"Answer: {ai_message.content}")
-        break
+        answer = ai_message.content
+        print(f"Answer: {answer}")
+        return answer
+
+
+def chat_loop(tools: Optional[List[BaseTool]] = None) -> None:
+    """
+    Simple interactive loop so you can experiment with tool-calling.
+
+    Type 'exit', 'quit', or press Ctrl+C to stop.
+    """
+    if tools is None:
+        tools = get_default_tools()
+
+    print("\nStarting interactive tool-calling chat.")
+    print("Type your question and press Enter (or 'exit' to quit).\n")
+
+    try:
+        while True:
+            user_input = input("> ").strip()
+            if user_input.lower() in {"exit", "quit"}:
+                print("Goodbye!")
+                break
+            if not user_input:
+                continue
+
+            run_question(user_input, tools=tools)
+    except KeyboardInterrupt:
+        print("\nInterrupted, exiting chat.")
 
 
 if __name__ == "__main__":
